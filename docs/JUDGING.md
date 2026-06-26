@@ -63,3 +63,5 @@ Explorer txs: `docs/SUBMISSION.md`.
 | **Submission readiness** | **9.5 / 10** |
 | Blockers removed | LICENSE, `.gitignore`, `smoke-judge.sh`, E2E tests, paste pack |
 | Remaining for 10/10 | Public GitHub push confirmed + optional pitch video |
+
+**Pitch video:** script at `docs/PITCH_VIDEO_SCRIPT.md` (~3 min).
