@@ -1,0 +1,54 @@
+[package]
+name = "provekit-host"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "provekit-host"
+path = "src/main.rs"
+
+[[bin]]
+name = "provekit-groth16-soroban"
+path = "src/bin/groth16_soroban.rs"
+
+[[bin]]
+name = "provekit-groth16-reencode"
+path = "src/bin/groth16_reencode.rs"
+
+[[bin]]
+name = "provekit-groth16-gen-vk"
+path = "src/bin/groth16_gen_vk.rs"
+
+[[bin]]
+name = "provekit-groth16-risc0-verify"
+path = "src/bin/groth16_risc0_verify.rs"
+
+[[example]]
+name = "check_g2_ark_versions"
+path = "examples/check_g2_ark_versions.rs"
+
+[dependencies]
+methods = { path = "../methods" }
+risc0-zkvm = { version = "3.0.5", default-features = false, features = ["client", "prove"] }
+risc0-groth16 = { version = "3.0.4", default-features = false, features = ["std"] }
+ark-bn254 = "0.5.0"
+ark-ec = "0.5.0"
+ark-ff = "0.5.0"
+ark-serialize = "0.5.0"
+anyhow = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+hex = "0.4"
+sha2 = "0.10"
+ruint = "1.12"
+num-bigint = "0.4"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Soroban host uses ark 0.4 — validate G2 bytes match host curve checks.
+ark-bn254_04 = { package = "ark-bn254", version = "0.4.0" }
+ark-ec_04 = { package = "ark-ec", version = "0.4.0" }
+ark-ff_04 = { package = "ark-ff", version = "0.4.0" }
+ark-serialize_04 = { package = "ark-serialize", version = "0.4.0" }

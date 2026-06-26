@@ -1,0 +1,26 @@
+# Build / Rust
+**/target/
+**/*.rs.bk
+
+# Secrets & local env
+scripts/env.local
+.env
+.env.*
+
+# Provekit / RISC Zero
+provekit/target/
+provekit/methods/target/
+*.lock.bak
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Large repro artifacts (document paths; judges use committed lock files)
+provekit/artifacts/*.bin
+!provekit/artifacts/.gitkeep
+
+# Soroban test snapshots (optional regen)
+contracts/**/test_snapshots/

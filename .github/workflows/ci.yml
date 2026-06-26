@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            contracts/risc0-verifier
+            contracts/gate
+            provekit/host
+
+      - name: Test risc0-verifier
+        run: cargo test --manifest-path contracts/risc0-verifier/Cargo.toml
+
+      - name: Install Stellar CLI
+        run: cargo install stellar-cli --locked --quiet 2>/dev/null || true
+
+      - name: Build risc0-verifier WASM (gate cross-contract tests)
+        run: cd contracts/risc0-verifier && stellar contract build
+
+      - name: Test gate
+        run: cargo test --manifest-path contracts/gate/Cargo.toml
+
+      - name: Build host release
+        run: cargo build --release --manifest-path provekit/host/Cargo.toml
+
+      - name: Reencode Groth16 artifacts
+        run: provekit/target/release/provekit-groth16-reencode
+
+      - name: Verify locked artifacts (local)
+        run: cargo test --manifest-path contracts/risc0-verifier/Cargo.toml verify_artifacts_groth16_invoke_json -- --nocapture
