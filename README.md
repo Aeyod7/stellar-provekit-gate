@@ -42,7 +42,7 @@ The same pattern applies to access control, attestations, and settlement hooks �
 
 ---
 
-## Our solution (Path B)
+## Our solution 
 
 End-to-end pipeline:
 
@@ -109,9 +109,6 @@ Full deploy/init/spend history: [`docs/SUBMISSION.md`](docs/SUBMISSION.md).
 ---
 
 ## Judges: verify in ~5 minutes
-
-No video required — reproducibility and explorer links are the demo.
-
 ```bash
 git clone https://github.com/Aeyod7/stellar-provekit-gate.git
 cd stellar-provekit-gate
@@ -191,9 +188,3 @@ This is a **hackathon testnet demonstration**, not a mainnet security audit. VK 
 ## License
 
 MIT — see [`LICENSE`](LICENSE). Copyright (c) 2026 Ayomide Apeh (Aeyo).
-
----
-
-## Submission
-
-Dorahacks form fields and elevator copy: [`docs/DORAHACKS_PASTE.md`](docs/DORAHACKS_PASTE.md).
