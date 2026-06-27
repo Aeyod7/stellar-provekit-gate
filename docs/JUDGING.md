@@ -39,11 +39,11 @@ Explorer txs: `docs/SUBMISSION.md`.
 - Deploy scripts, locked `artifacts/`, Python invoke helpers, CI (`.github/workflows/ci.yml`).
 - Docs: `PATH_B.md`, `SECURITY.md`, `SUBMISSION.md`, `DEMO_POLICY.md`, `DORAHACKS_PASTE.md`, MIT `LICENSE`.
 
-## Demo script (3 min, no video in repo)
+## Judge path (no video)
 
-1. Run `./scripts/smoke-judge.sh` → green.
-2. Show `artifacts/soroban_groth16_invoke.json` + `docs/DEMO_POLICY.md`.
-3. Open **on-chain** gate spend + replay txs in `docs/SUBMISSION.md`.
+1. `./scripts/smoke-judge.sh` → `OK`.
+2. `docs/DEMO_POLICY.md` + locked `artifacts/soroban_groth16_invoke.json`.
+3. Stellar Expert: gate spend + replay txs in `docs/SUBMISSION.md`.
 
 ## Self-score (2026-06-26 refresh)
 
@@ -62,6 +62,4 @@ Explorer txs: `docs/SUBMISSION.md`.
 |------|-------|
 | **Submission readiness** | **9.5 / 10** |
 | Blockers removed | LICENSE, `.gitignore`, `smoke-judge.sh`, E2E tests, paste pack |
-| Remaining for 10/10 | Public GitHub push confirmed + optional pitch video |
-
-**Pitch video:** script at `docs/PITCH_VIDEO_SCRIPT.md` (~3 min).
+| Remaining for 10/10 | Confirm latest `main` pushed to GitHub before Dorahacks submit |

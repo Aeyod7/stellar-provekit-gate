@@ -3,7 +3,7 @@
 **Repo:** https://github.com/Aeyod7/stellar-provekit-gate  
 **Local path:** `/home/aeyo/stellar-provekit-gate`  
 **Track:** RISC Zero / Groth16 on Soroban (Stellar testnet)  
-**Readiness (self-assessed):** **9.5 / 10** — see `docs/JUDGING.md`, `./scripts/smoke-judge.sh`
+**Readiness (self-assessed):** **9.5 / 10** — see `docs/JUDGING.md`, `./scripts/smoke-judge.sh`, explorer links below.
 
 ## One-liner
 
