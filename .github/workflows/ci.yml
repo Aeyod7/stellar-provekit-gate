@@ -26,7 +26,7 @@ jobs:
         run: cargo test --manifest-path contracts/risc0-verifier/Cargo.toml
 
       - name: Install Stellar CLI
-        run: cargo install stellar-cli --locked --quiet 2>/dev/null || true
+        uses: stellar/stellar-cli@v27.0.0
 
       - name: Build risc0-verifier WASM (gate cross-contract tests)
         run: cd contracts/risc0-verifier && stellar contract build
