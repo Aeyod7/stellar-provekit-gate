@@ -10,7 +10,7 @@ cargo test --manifest-path "$ROOT/contracts/risc0-verifier/Cargo.toml" -q
 echo "==> build risc0-verifier WASM (gate E2E)"
 (cd "$ROOT/contracts/risc0-verifier" && stellar contract build -q)
 
-echo "==> gate tests (8 tests incl. locked-artifact E2E)"
+echo "==> gate tests (9 tests incl. locked-artifact E2E + claim binding)"
 cargo test --manifest-path "$ROOT/contracts/gate/Cargo.toml" -q
 
 echo "==> host release + groth16 reencode"

@@ -215,6 +215,36 @@ fn verify_and_spend_risc0_wrong_policy_returns_false() {
 }
 
 #[test]
+fn verify_and_spend_risc0_wrong_claim_returns_false() {
+    // Tamper the claim_digest limb (public input index 2) but keep policy and a
+    // matching nullifier, so the request is only rejected by the claim binding.
+    let env = Env::default();
+    let (client, _admin) = setup_gate_with_verifier(&env);
+    let v = load_artifact_invoke();
+    let (proof_a, proof_b, proof_c, pub_vec) = invoke_args_from_artifacts(&env, &v);
+    let policy = load_policy_commitment(&env);
+
+    let mut tampered = Vec::new(&env);
+    for i in 0..pub_vec.len() {
+        if i == 2 {
+            tampered.push_back(BytesN::from_array(&env, &[0u8; 32]));
+        } else {
+            tampered.push_back(pub_vec.get(i).unwrap());
+        }
+    }
+    let nullifier = compute_proof_id(&env, &proof_a, &proof_b, &proof_c, &tampered);
+
+    assert!(!client.verify_and_spend_risc0(
+        &nullifier,
+        &policy,
+        &proof_a,
+        &proof_b,
+        &proof_c,
+        &tampered,
+    ));
+}
+
+#[test]
 fn verify_and_spend_risc0_wrong_nullifier_returns_false() {
     let env = Env::default();
     let (client, _admin) = setup_gate_with_verifier(&env);

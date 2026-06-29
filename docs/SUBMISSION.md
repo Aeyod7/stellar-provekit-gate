@@ -16,7 +16,7 @@ Prove a RISC Zero guest policy off-chain, re-encode the Groth16 seal for Soroban
 | Off-chain RISC0 Groth16 | `provekit/target/release/provekit-groth16-risc0-verify` | OK |
 | Re-encode for Soroban | `provekit/target/release/provekit-groth16-reencode` | `artifacts/soroban_groth16_invoke.json`, `artifacts/policy_commitment.hex` |
 | Local on-chain verify | `cargo test -p risc0-verifier verify_artifacts_groth16_invoke_json` | OK |
-| Gate E2E (locked artifacts) | `cargo test -p provekit-gate` (8 tests) | OK |
+| Gate E2E (locked artifacts) | `cargo test -p provekit-gate` (9 tests) | OK |
 | Judge smoke (all local) | `./scripts/smoke-judge.sh` | OK |
 | Testnet `verify_proof` (sim) | `scripts/invoke-risc0-groth16-testnet.py` | `true` |
 | Testnet `verify_proof` (on-chain) | `STELLAR_SEND=yes python3 scripts/invoke-risc0-groth16-testnet.py` | [tx `c94800bd…`](https://stellar.expert/explorer/testnet/tx/c94800bd1b7cc2b806681fa9ae38c3885fd8036b6423027bb11a40105b57c66a) → `true` |
@@ -55,9 +55,9 @@ Soroban verifies the **RISC Zero Groth16 BN254 wrapper** (`verify_proof`). The g
 1. **Guest** — RISC Zero ELF proves policy (e.g. threshold); SHA-256 commitment in journal.
 2. **Host** — `provekit/host` compresses seal, builds Soroban G1/G2 limbs + 5 Fr public inputs.
 3. **Verifier** — `contracts/risc0-verifier` fixed VK, `verify_proof`.
-4. **Gate** — `verify_and_spend_risc0` checks policy commitment + nullifier = proof id, cross-invokes verifier.
+4. **Gate** — `verify_and_spend_risc0` checks policy commitment + **expected guest `claim_digest`** + nullifier = proof id, then cross-invokes the verifier.
 
-Path A (`contracts/verifier` + gate inline VK) remains a Poseidon stub; **Path B is the submission story.**
+The gate ships a single RISC Zero Groth16 path; the gate also pins the expected guest `claim_digest`. An earlier Poseidon experiment under `contracts/verifier/` is kept for history only.
 
 ## Reproduce (no Docker required for locked artifacts)
 

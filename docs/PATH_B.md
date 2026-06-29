@@ -11,7 +11,7 @@ Off-chain: RISC Zero **Groth16** receipt for the ProveKit guest. On-chain: fixed
 | Host export | `provekit/host` bin `provekit-groth16-soroban` |
 | Deploy | `scripts/deploy-risc0-verifier.sh` |
 
-Path A (Poseidon / 1 public input) stays in `contracts/verifier/` for the hackathon interim demo.
+An earlier Poseidon / 1-public-input experiment stays in `contracts/verifier/` for history only; it is not part of the submission.
 
 ## Generate VK
 

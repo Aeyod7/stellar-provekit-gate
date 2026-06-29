@@ -14,7 +14,9 @@ Hackathon: [Stellar Hacks: Real-World ZK](https://dorahacks.io/hackathon/stellar
 - **Proof-bound nullifier**: SHA-256 over proof limbs + public inputs (no replay with arbitrary nullifier).
 - **Policy commitment** on gate ties on-chain spend to guest journal binding (SHA-256 over score/threshold/met).
 
-Evidence: `cargo test` in `contracts/risc0-verifier` + `contracts/gate` (**8 tests**, cross-contract E2E on locked artifacts); `./scripts/smoke-judge.sh`; `provekit-groth16-reencode` artifacts.
+- **Guest-claim binding**: gate pins the expected RISC Zero `claim_digest`, so only proofs of *this* guest program + output are accepted (not any valid RISC Zero proof).
+
+Evidence: `cargo test` in `contracts/risc0-verifier` + `contracts/gate` (**9 tests**, cross-contract E2E on locked artifacts); `./scripts/smoke-judge.sh`; `provekit-groth16-reencode` artifacts.
 
 ## Real-world ZK
 
@@ -50,7 +52,7 @@ Explorer txs: `docs/SUBMISSION.md`.
 | Category | 1–5 | Notes |
 |----------|-----|-------|
 | Innovation | 4.5 | RISC0→Soroban Groth16 + composable gate |
-| Technical | 4.5 | Proof-bound nullifier, 8 gate tests, WASM E2E |
+| Technical | 4.5 | Proof-bound nullifier, claim binding, 9 gate tests, WASM E2E |
 | Real-world ZK | 4.5 | Guest journal + documented gate layering |
 | Completeness | 5 | Smoke script, CI, LICENSE, submission pack |
 | UX / clarity | 4.5 | README Path B, judge 5-min path |
