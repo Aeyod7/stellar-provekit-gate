@@ -55,7 +55,7 @@ artifacts/soroban_groth16_invoke.json
         ↓
 Soroban risc0-verifier.verify_proof (5 public inputs, fixed VK)
         ↓
-gate.verify_and_spend_risc0 (policy + proof-bound nullifier + cross-invoke)
+gate.verify_and_spend_risc0 (claim binding + policy + proof-bound nullifier + cross-invoke)
 ```
 
 ### Components
@@ -67,17 +67,28 @@ gate.verify_and_spend_risc0 (policy + proof-bound nullifier + cross-invoke)
 | **Verifier** | `contracts/risc0-verifier` | On-chain Groth16 verify (RISC Zero BN254 wrapper) |
 | **Gate** | `contracts/gate` | `verify_and_spend_risc0`: verifier + policy match + one-shot spend |
 
-**Path A** (`contracts/verifier` + legacy gate path) is a Poseidon stub for interim experiments — **judges should evaluate Path B only.** See [`docs/PATH_B.md`](docs/PATH_B.md).
+The gate ships a **single path** (RISC Zero Groth16). An earlier Poseidon-preimage experiment lives under `contracts/verifier/` for history only — it is not part of the submission. See [`docs/PATH_B.md`](docs/PATH_B.md).
 
 ### What the gate enforces (three layers)
 
 Documented honestly in [`docs/DEMO_POLICY.md`](docs/DEMO_POLICY.md):
 
-1. **Cryptography** — Groth16 proves a valid RISC Zero execution (claim digest, control root, etc. in public inputs).  
-2. **Policy version** — caller’s `policy_commitment` must match the value set at gate `initialize`.  
+1. **Cryptography** — Groth16 pairing check (in `contracts/risc0-verifier`) proves a valid RISC Zero execution over the 5 public inputs (control root, claim digest, control id).  
+2. **Program + policy binding** — the proof's `claim_digest` (= `SHA-256(image_id, journal_digest, …)`) must equal the value baked into the gate at build time, so only proofs of **this guest program and this attested output** are accepted — not "any valid RISC Zero proof." The caller's `policy_commitment` must additionally match the value set at gate `initialize`.  
 3. **Anti-replay** — `nullifier` = `SHA-256(proof_a ‖ proof_b ‖ proof_c ‖ public_inputs)`; same proof cannot spend twice.
 
 These are **separate concerns** by design so judges are not misled into thinking the verifier alone encodes business policy.
+
+### Guarantees at a glance
+
+| Attack | Defense | Test |
+|--------|---------|------|
+| Forged / invalid proof | BN254 Groth16 pairing check on-chain | `risc0-verifier` E2E |
+| Valid proof of a **different program** | Gate pins expected `claim_digest` | `verify_and_spend_risc0_wrong_claim_returns_false` |
+| Wrong policy version | `policy_commitment` must match init value | `verify_and_spend_risc0_wrong_policy_returns_false` |
+| Replay with a fresh nullifier | `nullifier` must equal the proof's own id | `verify_and_spend_risc0_wrong_nullifier_returns_false` |
+| Double-spend (same proof twice) | One-shot nullifier set | `verify_and_spend_risc0_replay_returns_false` |
+| Malicious verifier swap | `init_risc0_verifier` is admin-gated + one-time | `init_risc0_verifier_admin_gated_and_one_time` |
 
 ### Demo policy (locked in repo)
 
@@ -102,7 +113,7 @@ These are **separate concerns** by design so judges are not misled into thinking
 | Contract | ID |
 |----------|-----|
 | Gate | `CBVJSXUQEWFGDTBPKVXANKSR2P6HZ7KZDIUNPXOD6ARMARNHEHPHRNMM` |
-| RISC0 verifier | `CB6BHX3KGHVAEEBAAARM27YCK6VLKEDTR3K2H2CT3IQ3BY5RAG7D6L6KD` |
+| RISC0 verifier | `CB6BHX3KGHVAEEBAAARM27YCK6VLKEDTR3KGPU6KVSJ7T3VKH7JDDLFV` |
 
 Full deploy/init/spend history: [`docs/SUBMISSION.md`](docs/SUBMISSION.md).
 
@@ -116,7 +127,8 @@ chmod +x scripts/smoke-judge.sh
 ./scripts/smoke-judge.sh
 ```
 
-Expected final line: **`OK — local judge smoke passed.`**
+Expected final line: **`OK — local judge smoke passed.`**  
+The smoke script runs the contract tests and verifies the locked Groth16 artifact on the RISC Zero proof. Re-proving/re-encoding requires the RISC Zero toolchain (Docker/rzup) and is optional — see `docs/PATH_B.md`.
 
 Then read:
 
@@ -128,7 +140,7 @@ Then read:
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Testnet limits and fixes |
 | [`docs/DORAHACKS_PASTE.md`](docs/DORAHACKS_PASTE.md) | Form copy-paste pack |
 
-**CI:** GitHub Actions runs verifier tests, builds verifier WASM, runs gate tests (including cross-contract E2E on locked `artifacts/soroban_groth16_invoke.json`).
+**CI:** GitHub Actions runs verifier tests, builds verifier WASM, runs gate tests (including cross-contract E2E on locked `artifacts/soroban_groth16_invoke.json`), and verifies the locked artifact. The optional host build/reencode job requires the RISC Zero toolchain.
 
 ---
 
@@ -138,14 +150,17 @@ Then read:
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 cd stellar-provekit-gate
 
-# Host + locked artifacts
+# Contracts (core judge path, no Docker needed)
+cd contracts/risc0-verifier && stellar contract build && cargo test
+cd ../gate && cargo test
+
+# Verify locked artifacts
+cargo test --manifest-path contracts/risc0-verifier/Cargo.toml verify_artifacts_groth16_invoke_json -- --nocapture
+
+# Host + reprove (optional, needs RISC Zero toolchain / Docker)
 cargo build --release --manifest-path provekit/host/Cargo.toml
 provekit/target/release/provekit-groth16-reencode
 provekit/target/release/provekit-groth16-risc0-verify
-
-# Contracts
-cd contracts/risc0-verifier && stellar contract build && cargo test
-cd ../gate && cargo test
 ```
 
 Fresh Groth16 prove (new seal / VK) requires Docker — see [`docs/PATH_B.md`](docs/PATH_B.md).
@@ -181,7 +196,7 @@ scripts/
 
 ## Security and scope
 
-This is a **hackathon testnet demonstration**, not a mainnet security audit. VK is embedded in verifier WASM; guest circuit changes require regen and redeploy. See [`docs/SECURITY.md`](docs/SECURITY.md).
+This is a **hackathon testnet demonstration**, not a mainnet security audit. VK and the expected guest `claim_digest` are embedded in the contracts; guest circuit changes require regen and redeploy. The live testnet transactions linked above were produced by the prior gate build (same `spend → true`, `replay → false` behavior); repo `main` additionally enforces the **guest-claim binding** and drops the legacy path, and redeploys via `scripts/deploy-gate.sh`. See [`docs/SECURITY.md`](docs/SECURITY.md).
 
 ---
 

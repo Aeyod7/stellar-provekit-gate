@@ -21,15 +21,15 @@ STARK receipt  →  risc0-groth16 compress  →  Groth16 proof + public inputs  
 
 1. Guest proves `secret_score >= threshold`; journal commits `threshold_met` + SHA-256 **policy commitment**.
 2. Host compresses seal and writes `artifacts/soroban_groth16_invoke.json` + `artifacts/policy_commitment.hex`.
-3. Gate stores expected policy commitment at `initialize`; spend requires matching commitment + proof-bound nullifier.
+3. Gate stores expected policy commitment at `initialize`; spend requires matching commitment + expected guest `claim_digest` + proof-bound nullifier.
 
 ## Fresh circuit / VK
 
 New guest ELF → regen VK (`provekit-groth16-gen-vk`) → redeploy `risc0-verifier` and gate. Docker required for fresh Groth16 prove (`scripts/provekit-groth16-soroban.sh`).
 
-## Path A (legacy interim)
+## Archived experiment
 
-`contracts/verifier/` + gate inline VK remain a **Poseidon preimage** stub for early demos; not the submission story.
+`contracts/verifier/` is an earlier **Poseidon preimage** verifier kept for history only; the gate no longer references it and it is not part of the submission.
 
 ## Boundless narrative
 

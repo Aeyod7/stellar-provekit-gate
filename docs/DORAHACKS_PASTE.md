@@ -20,11 +20,11 @@ We prove **private policy inputs** off-chain with **RISC Zero**, verify **Groth1
 
 **Problem:** Public chains need policy enforcement on **sensitive data** (scores, eligibility, compliance) without publishing secrets or trusting a central server.
 
-**Solution:** Path B pipeline — RISC Zero guest → ProveKit Groth16 re-encode → Soroban `risc0-verifier` → `gate.verify_and_spend_risc0`. The guest commits a **policy hash** and **threshold_met** in its journal; the gate checks **policy version**, delegates crypto to the verifier, and blocks **double spend** via a nullifier derived from the proof.
+**Solution:** RISC Zero guest → ProveKit Groth16 re-encode → Soroban `risc0-verifier` → `gate.verify_and_spend_risc0`. The guest commits a **policy hash** and **threshold_met** in its journal; the gate **binds the proof to this guest program** (expected `claim_digest`), checks **policy version**, delegates the BN254 pairing to the verifier, and blocks **double spend** via a nullifier derived from the proof.
 
-**Evidence:** Locked artifacts in-repo, 8 gate tests (cross-contract E2E), CI, `./scripts/smoke-judge.sh`, and Stellar testnet explorer transactions (spend + replay).
+**Evidence:** Locked artifacts in-repo, 9 gate tests (cross-contract E2E + claim/policy/nullifier negatives), CI, `./scripts/smoke-judge.sh`, and Stellar testnet explorer transactions (spend + replay).
 
-**Honesty:** Groth16 proves RISC Zero execution; gate policy commitment is a separate layer — see `docs/DEMO_POLICY.md`.
+**Honesty:** Groth16 proves RISC Zero execution; the gate's claim-digest binding ties it to the exact program/output, and policy commitment + nullifier are separate settlement layers — see `docs/DEMO_POLICY.md`.
 
 ---
 
@@ -49,7 +49,7 @@ ProveKit Gate is infrastructure for **real-world ZK on Stellar**, not a consumer
 | Replay → `false` | https://stellar.expert/explorer/testnet/tx/4248be2854e11870dfae394852f95b9664779b8db229ebfb6ec9b517a7ad09f8 |
 
 Gate: `CBVJSXUQEWFGDTBPKVXANKSR2P6HZ7KZDIUNPXOD6ARMARNHEHPHRNMM`  
-Verifier: `CB6BHX3KGHVAEEBAAARM27YCK6VLKEDTR3K2H2CT3IQ3BY5RAG7D6L6KD`
+Verifier: `CB6BHX3KGHVAEEBAAARM27YCK6VLKEDTR3KGPU6KVSJ7T3VKH7JDDLFV`
 
 **Verify locally (5 min)**
 
