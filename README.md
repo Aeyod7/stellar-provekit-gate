@@ -127,7 +127,8 @@ chmod +x scripts/smoke-judge.sh
 ./scripts/smoke-judge.sh
 ```
 
-Expected final line: **`OK — local judge smoke passed.`**
+Expected final line: **`OK — local judge smoke passed.`**  
+The smoke script runs the contract tests and verifies the locked Groth16 artifact on the RISC Zero proof. Re-proving/re-encoding requires the RISC Zero toolchain (Docker/rzup) and is optional — see `docs/PATH_B.md`.
 
 Then read:
 
@@ -139,7 +140,7 @@ Then read:
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Testnet limits and fixes |
 | [`docs/DORAHACKS_PASTE.md`](docs/DORAHACKS_PASTE.md) | Form copy-paste pack |
 
-**CI:** GitHub Actions runs verifier tests, builds verifier WASM, runs gate tests (including cross-contract E2E on locked `artifacts/soroban_groth16_invoke.json`).
+**CI:** GitHub Actions runs verifier tests, builds verifier WASM, runs gate tests (including cross-contract E2E on locked `artifacts/soroban_groth16_invoke.json`), and verifies the locked artifact. The optional host build/reencode job requires the RISC Zero toolchain.
 
 ---
 
@@ -149,14 +150,17 @@ Then read:
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 cd stellar-provekit-gate
 
-# Host + locked artifacts
+# Contracts (core judge path, no Docker needed)
+cd contracts/risc0-verifier && stellar contract build && cargo test
+cd ../gate && cargo test
+
+# Verify locked artifacts
+cargo test --manifest-path contracts/risc0-verifier/Cargo.toml verify_artifacts_groth16_invoke_json -- --nocapture
+
+# Host + reprove (optional, needs RISC Zero toolchain / Docker)
 cargo build --release --manifest-path provekit/host/Cargo.toml
 provekit/target/release/provekit-groth16-reencode
 provekit/target/release/provekit-groth16-risc0-verify
-
-# Contracts
-cd contracts/risc0-verifier && stellar contract build && cargo test
-cd ../gate && cargo test
 ```
 
 Fresh Groth16 prove (new seal / VK) requires Docker — see [`docs/PATH_B.md`](docs/PATH_B.md).
